@@ -1,0 +1,27 @@
+name: Deploy Render
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+
+      - name: Health check
+        env:
+          APP_URL: ${{ secrets.RENDER_APP_URL }}
+          API_KEY: ${{ secrets.RENDER_API_KEY_FOR_HEALTH }}
+        run: |
+          for i in {1..10}; do
+            if curl -fsS -H "x-api-key: ${API_KEY}" "${APP_URL}/health"; then
+              exit 0
+            fi
+            sleep 10
+          done
+          exit 1

@@ -1,0 +1,7 @@
+from typing import Protocol
+
+
+class CacheProvider(Protocol):
+    async def get(self, key: str) -> dict | list | None: ...
+
+    async def set(self, key: str, value: dict | list, ttl_seconds: int) -> None: ...
