@@ -153,4 +153,4 @@ Configure secrets no GitHub Actions:
 
 ## Link de produção
 
-- Definir após publicar no Render: `https://<seu-app>.onrender.com`
+- Definir após publicar no Render: `https://api-pokemon-1mfb.onrender.com`
