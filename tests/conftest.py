@@ -35,7 +35,9 @@ class FakePokemonService:
             },
         )
 
-    async def get_pokemon(self, identifier: int | str) -> PokemonResponse:
+    async def get_pokemon(
+        self, identifier: int | str, db_session: Any | None = None
+    ) -> PokemonResponse:
         if str(identifier) == "9999":
             from app.core.exceptions import PokemonNotFoundError
 
@@ -52,17 +54,31 @@ class FakePokemonService:
             ),
         )
 
-    async def get_by_name(self, name: str) -> PokemonResponse:
-        return await self.get_pokemon(name)
+    async def get_by_name(self, name: str, db_session: Any | None = None) -> PokemonResponse:
+        return await self.get_pokemon(name, db_session=db_session)
 
     async def list_by_type(self, pokemon_type: str, page: int, size: int) -> PokemonListResponse:
         return await self.list_pokemons(page=page, size=size)
 
 
 @pytest.fixture()
-def client() -> Any:
+def client(monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory) -> Any:
+    db_path = tmp_path_factory.mktemp("read_only_db") / "test.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{db_path}")
+    get_settings.cache_clear()
+
     with TestClient(app) as test_client:
         test_client.app.state.pokemon_service = FakePokemonService()
+        yield test_client
+
+
+@pytest.fixture()
+def crud_client(monkeypatch: pytest.MonkeyPatch, tmp_path_factory: pytest.TempPathFactory) -> Any:
+    db_path = tmp_path_factory.mktemp("crud_db") / "test.db"
+    monkeypatch.setenv("DATABASE_URL", f"sqlite+aiosqlite:///{db_path}")
+    get_settings.cache_clear()
+
+    with TestClient(app) as test_client:
         yield test_client
 
 

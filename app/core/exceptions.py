@@ -17,6 +17,11 @@ class PokemonNotFoundError(AppError):
         super().__init__(detail=detail, status_code=404, error_code="POKEMON_NOT_FOUND")
 
 
+class PokemonAlreadyExistsError(AppError):
+    def __init__(self, detail: str = "Pokemon already exists") -> None:
+        super().__init__(detail=detail, status_code=409, error_code="POKEMON_ALREADY_EXISTS")
+
+
 class PokeAPIError(AppError):
     def __init__(self, detail: str = "Error while consuming PokeAPI") -> None:
         super().__init__(detail=detail, status_code=502, error_code="POKEAPI_ERROR")

@@ -1,6 +1,6 @@
 # API Pokemon
 
-API REST desenvolvida com FastAPI (Python 3.10) que consome dados da PokeAPI com cache local e Redis opcional.
+API REST desenvolvida com FastAPI (Python 3.10) que consome dados da PokeAPI com cache local e Redis opcional, além de CRUD local persistido em SQLite via SQLAlchemy.
 
 ## Funcionalidades
 
@@ -10,8 +10,13 @@ API REST desenvolvida com FastAPI (Python 3.10) que consome dados da PokeAPI com
   - `GET /pokemons/{id}`
   - `GET /pokemons/name/{name}`
   - `GET /pokemons/type/{type}?page=1&size=20`
+  - `GET /pokemons/local?page=1&size=20`
+  - `POST /pokemons`
+  - `PUT /pokemons/{id}`
+  - `DELETE /pokemons/{id}`
 - Paginação com metadados: total, page, size, next, previous
 - Cache em memória + Redis opcional com fallback
+- Persistência relacional local com SQLite e SQLAlchemy async
 - Tratamento de exceções personalizado
 - Autenticação simples via API key (`x-api-key`)
 - Logs estruturados em JSON
@@ -63,6 +68,44 @@ API REST desenvolvida com FastAPI (Python 3.10) que consome dados da PokeAPI com
 }
 ```
 
+## CRUD local
+
+Os endpoints `POST`, `PUT` e `DELETE` operam sobre registros persistidos localmente no banco configurado em `DATABASE_URL`.
+
+Exemplo de criação:
+
+```bash
+curl -X POST "http://localhost:8000/pokemons" \
+  -H "x-api-key: 123456789" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "testmon",
+    "height": 10,
+    "weight": 99,
+    "types": ["normal"],
+    "sprites": {
+      "front_default": "https://img/testmon-front.png",
+      "back_default": "https://img/testmon-back.png"
+    }
+  }'
+```
+
+Exemplo de atualização parcial:
+
+```bash
+curl -X PUT "http://localhost:8000/pokemons/1" \
+  -H "x-api-key: 123456789" \
+  -H "Content-Type: application/json" \
+  -d '{"name": "testmon-updated", "weight": 150}'
+```
+
+Exemplo de remoção:
+
+```bash
+curl -X DELETE "http://localhost:8000/pokemons/1" \
+  -H "x-api-key: 123456789"
+```
+
 ## Como rodar localmente (sem Docker)
 
 1. Crie e ative ambiente virtual.
@@ -87,6 +130,10 @@ uvicorn app.main:app --reload
 ```bash
 docker compose up --build
 ```
+
+### Banco local
+
+O valor padrão de `DATABASE_URL` é `sqlite+aiosqlite:///./pokemon.db`. Se quiser trocar para outro banco, ajuste a variável de ambiente antes de subir a aplicação.
 
 ## Testes e cobertura
 

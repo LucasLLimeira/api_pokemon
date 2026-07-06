@@ -25,3 +25,9 @@ class RedisCache:
             await self._redis.set(key, json.dumps(value), ex=ttl_seconds)
         except Exception:
             logger.exception("redis_set_failed")
+
+    async def delete(self, key: str) -> None:
+        try:
+            await self._redis.delete(key)
+        except Exception:
+            logger.exception("redis_delete_failed")

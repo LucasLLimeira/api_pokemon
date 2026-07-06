@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     pokeapi_base_url: str = "https://pokeapi.co/api/v2"
+    database_url: str = "sqlite+aiosqlite:///./pokemon.db"
 
     default_page_size: int = 20
     max_page_size: int = 100

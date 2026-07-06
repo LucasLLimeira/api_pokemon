@@ -23,3 +23,6 @@ class MemoryCache:
 
     async def set(self, key: str, value: dict | list, ttl_seconds: int) -> None:
         self._store[key] = CacheEntry(value=value, expires_at=time.time() + ttl_seconds)
+
+    async def delete(self, key: str) -> None:
+        self._store.pop(key, None)

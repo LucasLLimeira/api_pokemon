@@ -59,3 +59,92 @@ def test_pagination_validation_error(client, auth_headers):
     response = client.get("/pokemons?page=0&size=20", headers=auth_headers)
 
     assert response.status_code == 422
+
+
+def test_create_local_pokemon_success(crud_client, auth_headers):
+    payload = {
+        "name": "testmon",
+        "height": 11,
+        "weight": 99,
+        "types": ["normal"],
+        "sprites": {
+            "front_default": "https://img/testmon-front.png",
+            "back_default": "https://img/testmon-back.png",
+        },
+    }
+
+    response = crud_client.post("/pokemons", json=payload, headers=auth_headers)
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["id"] == 1
+    assert body["name"] == "testmon"
+
+
+def test_list_local_pokemons_success(crud_client, auth_headers):
+    crud_client.post(
+        "/pokemons",
+        json={
+            "name": "testmon",
+            "height": 11,
+            "weight": 99,
+            "types": ["normal"],
+            "sprites": {"front_default": None, "back_default": None},
+        },
+        headers=auth_headers,
+    )
+
+    response = crud_client.get("/pokemons/local?page=1&size=20", headers=auth_headers)
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["pagination"]["total"] == 1
+    assert payload["data"][0]["name"] == "testmon"
+
+
+def test_update_local_pokemon_success(crud_client, auth_headers):
+    created = crud_client.post(
+        "/pokemons",
+        json={
+            "name": "testmon",
+            "height": 11,
+            "weight": 99,
+            "types": ["normal"],
+            "sprites": {"front_default": None, "back_default": None},
+        },
+        headers=auth_headers,
+    )
+
+    pokemon_id = created.json()["id"]
+    response = crud_client.put(
+        f"/pokemons/{pokemon_id}",
+        json={"name": "testmon-updated", "weight": 150},
+        headers=auth_headers,
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["name"] == "testmon-updated"
+    assert payload["weight"] == 150
+
+
+def test_delete_local_pokemon_success(crud_client, auth_headers):
+    created = crud_client.post(
+        "/pokemons",
+        json={
+            "name": "testmon",
+            "height": 11,
+            "weight": 99,
+            "types": ["normal"],
+            "sprites": {"front_default": None, "back_default": None},
+        },
+        headers=auth_headers,
+    )
+
+    pokemon_id = created.json()["id"]
+    response = crud_client.delete(f"/pokemons/{pokemon_id}", headers=auth_headers)
+
+    assert response.status_code == 204
+
+    list_response = crud_client.get("/pokemons/local?page=1&size=20", headers=auth_headers)
+    assert list_response.json()["pagination"]["total"] == 0
