@@ -11,8 +11,16 @@ class Base(DeclarativeBase):
 pokemon_types = Table(
     "pokemon_types",
     Base.metadata,
-    Column("pokemon_id", ForeignKey("pokemons.id", ondelete="CASCADE"), primary_key=True),
-    Column("type_id", ForeignKey("types.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "pokemon_id",
+        ForeignKey("pokemons.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "type_id",
+        ForeignKey("types.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 
